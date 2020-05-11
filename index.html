@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GUI Calendar</title>
+
+<style type="text/css">
+*
+{
+padding:0;
+margin:0;
+box-sizing:border-box;
+}
+
+:root
+{
+--primary-color:#009688;
+--header-bg:#fff;
+--months-bg:#2ecc71;
+--months-color:#fff;
+--weekends--bg:#27ae60;
+--font-color:#fff;
+--today-bg:#27ae60;
+--today-color:#fff;
+--slider-circle:#000;
+--daysdiv-hover:#dfe6e9;
+--days-color:#000;
+
+}
+
+body
+{
+margin:0;
+font-family:"sans-serif";
+}
+.wrapper
+{
+width:100vw;
+height:100vh;
+background-color:var(--primary-color);				
+display:flex;
+//justify-content:center;
+//align-items:center;
+}
+
+.calendar
+{
+margin:auto;
+width:600px;
+background-color:#fff;	
+box-shadow:0px 0px 15px 3px rgba(0,0,0,0.2)
+}
+
+.months
+{
+display:flex;
+justify-content:space-between;
+align-items:center;
+width:100%;
+color:var(--months-color);
+background-color:var(--months-bg);
+text-align:center;
+padding:40px 30px;
+}
+
+.weekends
+{
+display:flex;
+color:var(--font-color);
+padding:7px 0px;
+background-color:var(--weekends-bg);
+}
+
+.weekends div
+{
+width:14.28%;			
+text-align:center;
+}
+
+.days
+{
+display:flex;
+flex-wrap:wrap;
+text-align:center;
+font-weight:300;
+padding:12px 0px;
+transition:all 0.4s all;
+background-color:var(--days-bg);
+color:var(--days-color);
+font-weight:bold;
+}
+
+.days div
+{
+width:14.28%;		
+margin-bottom:12px;
+padding:10px 0px;
+}
+
+.today
+{
+background-color:var(--today-bg);
+color:var(--today-color);
+cursor:pointer;
+font-weight:bold;
+font-size:23px;
+}
+
+.days div:hover
+{
+background-color:var(--daysdiv-hover);
+color:var(--days-hover-color);
+}
+
+.prev_date
+{
+color:#999;
+font-weight:bold;
+}
+
+#month
+{
+font-size:30px;
+font-weight:400;	
+}
+
+.prev,.next
+{
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:20px;
+width:50px;
+height:50px;
+background-color:rgba(0,0,0,0.1);
+border-radius:50%;
+font-weight:bold;
+transition:all 0.4s all;
+}
+
+
+.prev:hover,.next:hover
+{
+cursor:pointer;
+background-color:rgba(0,0,0,0.2);
+}
+
+/*slider switch css */
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+}
+.theme-switch-wrapper em {
+  margin-left: 10px;
+  font-size: 1rem;
+}
+
+.theme-switch {
+  display: inline-block;
+  height: 16px;
+  position: relative;
+  width:50px;
+}
+
+.theme-switch input {
+  display: none;
+}
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: 0.4s;
+}
+
+.slider:before {
+  background-color:var(--slider-circle); 
+  content: "";
+  bottom: -5px;
+  height: 26px;
+  /* left: 0px; */
+  right: 25px;
+  position: absolute;
+  transition: 0.4s;
+  width: 26px;
+}
+
+input:checked + .slider {
+  background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.calendar-header
+{
+display:flex;
+justify-content:flex-end;
+background-color:var(--header-bg);
+padding:0px 25px;
+height:50px;
+}
+
+
+[data-theme="dark"]
+{
+--primary-color:#333;
+--header-bg:#000;
+--months-bg:#fff;
+--months-color:#000;
+--weekends-bg:#000;
+--font-color:#fff;
+--today-bg:dodgerblue;
+--today-color:#fff;
+--slider-circle:#fff;
+--days-bg:#000;
+--days-color:#fff;
+--daysdiv-hover:#dfe6e9;
+--days-hover-color:#000;
+}
+
+
+</style>
+<meta charset="utf-8">
+</head>
+<body onload="RenderDate()">
+<div class="wrapper">
+
+<div class="calendar">
+
+<div class="calendar-header"> 
+<div class="theme-switch-wrapper">
+<label class="theme-switch" for="checkbox">
+<input type="checkbox" id="checkbox" />
+<div class="slider round"></div>
+</label>
+</div>
+</div>
+
+<div class="months">
+<div class="prev" onclick="moveDate('prev')">
+<span>&#10094</span>
+</div>
+<div>
+<h1 id="month">June</h1>
+<p id="date_str"></p>
+</div>
+<div class="next" onclick="moveDate('next')">
+<span>&#10095</span>
+</div>
+</div>
+
+<div class="weekends">
+<div>Sun</div>
+<div>Mon</div>
+<div>Tue</div>
+<div>Wed</div>
+<div>Thu</div>
+<div>Fri</div>
+<div>Sat</div>
+</div>
+
+<div class="days"></div>
+
+</div>
+
+</div>
+
+<!--Javascript link-->
+<script>
+const toggleSwitch = document.querySelector(
+  '.theme-switch input[type="checkbox"]'
+);
+
+function switchTheme(e) {
+  if (e.target.checked) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+}
+
+toggleSwitch.addEventListener("change", switchTheme, false);
+
+
+
+
+
+
+var dt=new Date();
+
+function RenderDate()
+{
+var day=dt.getDay();
+
+var endDate=new Date(dt.getFullYear(),dt.getMonth() +1,0).getDate();
+prevDate=new Date(dt.getFullYear(),dt.getMonth(),0).getDate();
+
+var today=new Date();
+console.log(today);
+
+var months=[
+"January",
+"February",
+"March",
+"April",
+"May",
+"June",
+"July",
+"August",
+"September",
+"October",
+"November",
+"December"
+];
+document.getElementById("date_str").innerHTML=dt.toDateString();
+document.getElementById("month").innerHTML=months[dt.getMonth()];
+
+var cells="";
+
+for(x=day;x>0;x--)
+{
+cells +="<div class='prev_date'>"+ (prevDate - x + 1) +"</div>";
+}
+
+for(i=1;i<=endDate;i++)
+{
+if(i == today.getDate() && dt.getMonth() == today.getMonth())
+{
+cells +="<div class='today'>"+i +"</div>";
+}
+else
+{
+cells +="<div>"+i +"</div>";
+}
+}
+document.getElementsByClassName("days")[0].innerHTML=cells;
+}
+
+
+function moveDate(para)
+{
+if(para == 'prev')
+{
+dt.setMonth(dt.getMonth() -1);
+}
+else if(para == 'next')
+{
+dt.setMonth(dt.getMonth() +1);
+}
+RenderDate();
+}
+</script>
+</body>
+</html>
